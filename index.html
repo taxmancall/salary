@@ -10,6 +10,8 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- 카카오 우편번호 서비스 (Daum Postcode API) -->
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Noto Sans KR', sans-serif; }
@@ -831,7 +833,7 @@ function Row({label,amount,isTotal,isSub,isHeader,accent,dimZero}) {
 function SalaryCalc() {
   const [form,setForm]=useState({
     companyName:"",ceoName:"",companyAddr:"",companyRegNo:"",companyPhone:"",
-    name:"",workerAddr:"",workerPhone:"",workerEmail:"",
+    name:"",workerAddr:"",workerPhone:"",workerEmail:"",emergencyName:"",emergencyPhone:"",
     baseSalary:"",mealAllowance:"",carAllowance:"",
     childAllowance:"",otherNontax:"",weeklyHours:"40",
     dependents:"1",childrenAge8to20:"0",
@@ -911,6 +913,7 @@ function SalaryCalc() {
       companyName:form.companyName||"회사명 미입력",ceoName:form.ceoName||"대표자 미입력",
       companyAddr:form.companyAddr||"",companyRegNo:form.companyRegNo||"",companyPhone:form.companyPhone||"",
       workerAddr:form.workerAddr||"",workerPhone:form.workerPhone||"",workerEmail:form.workerEmail||"",
+      emergencyName:form.emergencyName||"",emergencyPhone:form.emergencyPhone||"",
     });
     setTab("result");
   },[form]);
@@ -1002,25 +1005,7 @@ body{font-family:'Noto Sans KR',sans-serif;font-size:12.5px;background:#eef2ff;d
     <div class="hi2"><div class="hl">📌 통상시급 (연장·야간·휴일 기준 / 근기법§2①8)</div><div class="hv">${fmt(r.oH)}원/h</div><div class="hs">(기본급+식대) ${fmt(r.ordinaryBase)}원 ÷ ${r.mh}h</div></div>
     <div class="hi2"><div class="hl">⚖️ 최저임금 판단 시간급 ${r.minWageH>=r.minH?"✅ 충족":"❌ 미달"} (최저임금법§6④)</div><div class="hv" style="color:${r.minWageH>=r.minH?"#065f46":"#dc2626"}">${fmt(r.minWageH)}원/h</div><div class="hs">산입임금 ${fmt(r.minWageBase)}원 ÷ ${r.mh}h · 최저 ${fmt(r.minH)}원</div></div>
   </div>
-  <div class="emp-sec">
-    <div class="emp-hd"><span class="emp-hd-t">🏢 사업주 부담 보험료</span><span class="emp-hd-s">국민연금법§88 · 건강보험법§76 · 고용보험법§49 · 산재보험법§13</span></div>
-    <div class="emp-grid">
-      <div class="ecc"><div class="ecl">국민연금</div><div class="ecr">4.75%</div><div class="eca">${fmt(r.nps_e)}</div><div class="ecn">근로자 동일</div></div>
-      <div class="ecc"><div class="ecl">건강보험</div><div class="ecr">3.595%</div><div class="eca">${fmt(r.hi_e)}</div><div class="ecn">근로자 동일</div></div>
-      <div class="ecc"><div class="ecl">장기요양</div><div class="ecr">0.4724%</div><div class="eca">${fmt(r.ltc_e)}</div><div class="ecn">근로자 동일</div></div>
-      <div class="ecc"><div class="ecl">고용보험</div><div class="ecr">1.15%</div><div class="eca">${fmt(r.ei_e)}</div><div class="ecn">150인미만</div></div>
-      <div class="ecc warn"><div class="ecl w">산재보험</div><div class="ecr">1.0% (가정)</div><div class="eca">${fmt(r.wc_e)}</div><div class="ecn w">⚠️업종별상이</div></div>
-      <div class="ecc tot"><div class="ecl t">합 계</div><div class="ecr t">사업주 부담</div><div class="eca t">${fmt(r.totEmp)}</div><div class="ecn t">월 부담합계</div></div>
-    </div>
-    <div class="lt">
-      <div><div class="ltl">총 인건비 (사업주 실부담)</div><div class="lts">세전급여 ${fmt(r.gross)}원 + 사업주보험 ${fmt(r.totEmp)}원</div></div>
-      <div class="lta">${fmt(r.totalLabor)}원</div>
-    </div>
-    <div class="ewarn">
-      ⚠️ 산재보험료는 업종별 요율 상이 (고용노동부 고시, 매년 변경) — 본 계산서는 1.0% 가정<br>
-      고용보험 사업주(1.15%) = 실업급여 0.9% + 고용안정·직업능력개발 0.25% (150인 미만 기준)
-    </div>
-  </div>
+
   <div class="ft">
     ※ 소득세: 소득세법시행령 [별표2] 근로소득 간이세액표 (2026.2.27 개정, 대통령령 제36129호, 2026.3.1 시행) — 엑셀 원본 직접 파싱<br>
     ※ 자녀세액공제(8~20세): 1명 20,830원 / 2명 45,830원 / 추가 1명당 33,330원<br>
@@ -1070,6 +1055,7 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
     <tr><td>주소</td><td>${r.workerAddr||"　"}</td></tr>
     <tr><td>연락처</td><td>${r.workerPhone||"　"}</td></tr>
     <tr><td>이메일</td><td>${r.workerEmail||"　"}</td></tr>
+    ${r.emergencyName||r.emergencyPhone?`<tr><td>비상연락처</td><td>${r.emergencyName||""} ${r.emergencyPhone||""}</td></tr>`:""}
     <tr><td>부서 / 직위</td><td>${r.dept||"-"} / ${r.pos}</td></tr>
     <tr><td>입사일(계약개시일)</td><td>${r.startDate||"____년 ____월 ____일"}</td></tr>
   </table></div>
@@ -1112,6 +1098,17 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
     <div class="sb"><div class="sl">근로자</div><div class="sn">${r.name}</div><div class="ss">서명 ________________________ (인)</div></div>
   </div>
 </div></body></html>`;
+  }
+
+  // 카카오 우편번호 서비스 (Daum Postcode API) - 무료, 회원가입 불필요
+  function searchAddr(callback){
+    new window.daum.Postcode({
+      oncomplete:function(data){
+        // 도로명 주소 우선, 없으면 지번
+        const addr = data.roadAddress || data.jibunAddress;
+        callback(addr);
+      }
+    }).open();
   }
 
   function dl(html,name){
@@ -1315,7 +1312,17 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
                 <Field label="회사명 (사업장명)" value={form.companyName} onChange={setF("companyName")} placeholder="○○주식회사" suffix=""/>
                 <Field label="대표자명" value={form.ceoName} onChange={setF("ceoName")} placeholder="홍길동" suffix=""/>
               </div>
-              <Field label="회사 주소" value={form.companyAddr} onChange={setF("companyAddr")} placeholder="서울시 강남구 ○○로 123" suffix=""/>
+              <div style={{marginBottom:12}}>
+                <label style={{display:"block",fontSize:11,fontWeight:700,color:"#6b7280",marginBottom:2,letterSpacing:".05em",textTransform:"uppercase"}}>회사 주소</label>
+                <div style={{display:"flex",gap:6}}>
+                  <input value={form.companyAddr} onChange={setF("companyAddr")} placeholder="주소 검색 버튼을 눌러주세요"
+                    style={{flex:1,padding:"9px 13px",border:"1.5px solid #e5e7eb",borderRadius:7,fontSize:13,fontFamily:"'Noto Sans KR',sans-serif",outline:"none",backgroundColor:"#fafafa",color:"#111827"}}/>
+                  <button type="button" onClick={()=>searchAddr(addr=>setForm(p=>({...p,companyAddr:addr})))}
+                    style={{padding:"9px 14px",background:"#1e3a5f",color:"#fff",border:"none",borderRadius:7,fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:"'Noto Sans KR',sans-serif"}}>
+                    🔍 검색
+                  </button>
+                </div>
+              </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 10px"}}>
                 <Field label="사업자번호" value={form.companyRegNo} onChange={setF("companyRegNo")} placeholder="000-00-00000" suffix=""/>
                 <Field label="회사 연락처" value={form.companyPhone} onChange={setF("companyPhone")} placeholder="02-0000-0000" suffix=""/>
@@ -1331,10 +1338,25 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
                 <Field label="부서" value={form.dept} onChange={setF("dept")} placeholder="세무팀" suffix=""/>
                 <Field label="입사일" value={form.startDate} onChange={setF("startDate")} suffix="" type="date"/>
               </div>
-              <Field label="근로자 주소" value={form.workerAddr} onChange={setF("workerAddr")} placeholder="서울시 ○○구 ○○로 456" suffix=""/>
+              <div style={{marginBottom:12}}>
+                <label style={{display:"block",fontSize:11,fontWeight:700,color:"#6b7280",marginBottom:2,letterSpacing:".05em",textTransform:"uppercase"}}>근로자 주소</label>
+                <div style={{display:"flex",gap:6}}>
+                  <input value={form.workerAddr} onChange={setF("workerAddr")} placeholder="주소 검색 버튼을 눌러주세요"
+                    style={{flex:1,padding:"9px 13px",border:"1.5px solid #e5e7eb",borderRadius:7,fontSize:13,fontFamily:"'Noto Sans KR',sans-serif",outline:"none",backgroundColor:"#fafafa",color:"#111827"}}/>
+                  <button type="button" onClick={()=>searchAddr(addr=>setForm(p=>({...p,workerAddr:addr})))}
+                    style={{padding:"9px 14px",background:"#1e3a5f",color:"#fff",border:"none",borderRadius:7,fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:"'Noto Sans KR',sans-serif"}}>
+                    🔍 검색
+                  </button>
+                </div>
+              </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 10px"}}>
                 <Field label="연락처" value={form.workerPhone} onChange={setF("workerPhone")} placeholder="010-0000-0000" suffix=""/>
                 <Field label="이메일" value={form.workerEmail} onChange={setF("workerEmail")} placeholder="example@email.com" suffix=""/>
+              </div>
+              <div style={{fontSize:10.5,fontWeight:700,color:"#64748b",marginTop:8,marginBottom:4}}>비상연락처</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 10px"}}>
+                <Field label="비상연락처 이름" value={form.emergencyName} onChange={setF("emergencyName")} placeholder="홍아무개 (배우자)" suffix=""/>
+                <Field label="비상연락처 전화번호" value={form.emergencyPhone} onChange={setF("emergencyPhone")} placeholder="010-0000-0000" suffix=""/>
               </div>
             </div>
 
@@ -1406,52 +1428,6 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
               </div>
             </div>
 
-            {/* 사업주 부담 */}
-            <div style={{background:"#fff",borderRadius:12,padding:14,marginBottom:10,boxShadow:"0 2px 10px rgba(30,58,95,.06)"}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                <div style={{fontSize:11,fontWeight:700,color:"#7c3aed"}}>🏢 사업주 부담 보험료</div>
-                <div style={{fontSize:9.5,color:"#9ca3af"}}>국민연금법§88 · 건강보험법§76 · 고용보험법§49</div>
-              </div>
-              {/* 비교 테이블 */}
-              <div style={{border:"1px solid #f1f5f9",borderRadius:8,overflow:"hidden",marginBottom:8}}>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",background:"#f8fafc",fontSize:10,fontWeight:700,color:"#64748b"}}>
-                  {["항목","요율","근로자","사업주"].map(h=><div key={h} style={{padding:"6px 10px",borderRight:"1px solid #f1f5f9"}}>{h}</div>)}
-                </div>
-                {[
-                  {label:"국민연금",rate:"각 4.75%",w:result.nps_w,e:result.nps_e,note:""},
-                  {label:"건강보험",rate:"각 3.595%",w:result.hi_w,e:result.hi_e,note:""},
-                  {label:"장기요양",rate:"각 0.4724%",w:result.ltc_w,e:result.ltc_e,note:""},
-                  {label:"고용보험",rate:"0.9% / 1.15%",w:result.ei_w,e:result.ei_e,note:"150인미만"},
-                  {label:"산재보험",rate:"1.0% (가정)",w:null,e:result.wc_e,note:"⚠️업종별상이",warn:true},
-                ].map((it,i)=>(
-                  <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",borderTop:"1px solid #f1f5f9",fontSize:11.5,background:it.warn?"#fff7ed":"transparent"}}>
-                    <div style={{padding:"5px 10px",color:it.warn?"#92400e":"#374151",fontWeight:500,borderRight:"1px solid #f1f5f9"}}>
-                      {it.label}{it.note&&<span style={{fontSize:9,color:"#9ca3af",display:"block"}}>{it.note}</span>}
-                    </div>
-                    <div style={{padding:"5px 10px",color:"#64748b",fontSize:10.5,borderRight:"1px solid #f1f5f9"}}>{it.rate}</div>
-                    <div style={{padding:"5px 10px",fontFamily:"monospace",fontWeight:600,color:"#374151",borderRight:"1px solid #f1f5f9",whiteSpace:"nowrap"}}>{it.w!=null?`${fmt(it.w)}원`:"-"}</div>
-                    <div style={{padding:"5px 10px",fontFamily:"monospace",fontWeight:600,color:it.warn?"#92400e":"#7c3aed",whiteSpace:"nowrap"}}>{fmt(it.e)}원</div>
-                  </div>
-                ))}
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",borderTop:"2px solid #e2e8f0",background:"#f5f3ff",fontSize:12,fontWeight:700}}>
-                  <div style={{padding:"7px 10px",color:"#4c1d95",borderRight:"1px solid #ede9fe"}}>합계</div>
-                  <div style={{padding:"7px 10px",color:"#64748b",fontSize:10,borderRight:"1px solid #ede9fe"}}>-</div>
-                  <div style={{padding:"7px 10px",fontFamily:"monospace",color:"#374151",borderRight:"1px solid #ede9fe"}}>{fmt(result.totW4)}원</div>
-                  <div style={{padding:"7px 10px",fontFamily:"monospace",color:"#7c3aed"}}>{fmt(result.totEmp)}원</div>
-                </div>
-              </div>
-              {/* 총 인건비 */}
-              <div style={{background:"linear-gradient(135deg,#4c1d95,#7c3aed)",borderRadius:8,padding:"11px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <div>
-                  <div style={{fontSize:11,color:"rgba(255,255,255,.85)",fontWeight:600}}>총 인건비 (사업주 실부담)</div>
-                  <div style={{fontSize:9,color:"rgba(255,255,255,.6)",marginTop:1}}>세전급여 {fmt(result.gross)}원 + 사업주보험 {fmt(result.totEmp)}원</div>
-                </div>
-                <div style={{fontSize:18,fontWeight:700,color:"#fff",fontFamily:"monospace"}}>{fmt(result.totalLabor)}원</div>
-              </div>
-              <div style={{fontSize:9,color:"#f59e0b",marginTop:6,lineHeight:1.6}}>
-                ⚠️ 산재보험: 업종별 요율 상이 (고용노동부 고시) — 1.0% 가정 | 고용보험 사업주(1.15%) = 150인 미만 기준
-              </div>
-            </div>
 
             {/* 시급 */}
             <div style={{background:"#fff",borderRadius:12,padding:14,marginBottom:10,boxShadow:"0 2px 10px rgba(30,58,95,.06)"}}>
