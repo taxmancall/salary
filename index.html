@@ -10,7 +10,6 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.umd.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Noto Sans KR', sans-serif; }
@@ -1475,10 +1474,15 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
                 style={{padding:"12px",background:"linear-gradient(135deg,#1e3a5f,#2563eb)",color:"#fff",border:"none",borderRadius:10,fontSize:12.5,fontWeight:700,cursor:"pointer",fontFamily:"'Noto Sans KR',sans-serif"}}>
                 📄 급여명세서
               </button>
-              <button onClick={()=>{dlContractDocx(result).then(()=>{setDlMsg("✅ 근로계약서(.docx) 저장!");setTimeout(()=>setDlMsg(""),3000);});}}
-                style={{padding:"12px",background:"linear-gradient(135deg,#065f46,#059669)",color:"#fff",border:"none",borderRadius:10,fontSize:12.5,fontWeight:700,cursor:"pointer",fontFamily:"'Noto Sans KR',sans-serif"}}>
-                📋 근로계약서(.docx)
-              </button>
+              <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                <button onClick={()=>{dl(makeContract(result),`근로계약서_${result.name}.html`);setDlMsg("✅ 근로계약서 저장!");setTimeout(()=>setDlMsg(""),3000);}}
+                  style={{padding:"12px",background:"linear-gradient(135deg,#065f46,#059669)",color:"#fff",border:"none",borderRadius:10,fontSize:12.5,fontWeight:700,cursor:"pointer",fontFamily:"'Noto Sans KR',sans-serif"}}>
+                  📋 근로계약서 저장
+                </button>
+                <div style={{fontSize:9.5,color:"#64748b",textAlign:"center",lineHeight:1.5}}>
+                  HTML 파일로 저장됩니다.<br/>Word에서 열면 자동으로 워드 문서로 변환됩니다.
+                </div>
+              </div>
             </div>
             {dlMsg&&<div style={{textAlign:"center",fontSize:12,color:"#059669",fontWeight:600,marginBottom:8}}>{dlMsg}</div>}
             <button onClick={()=>setTab("input")} style={{width:"100%",padding:10,background:"transparent",border:"1.5px solid #e5e7eb",borderRadius:9,fontSize:12.5,color:"#64748b",cursor:"pointer",fontFamily:"'Noto Sans KR',sans-serif"}}>
