@@ -1432,6 +1432,50 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
               </div>
             </div>
 
+            {/* 사업주 부담 */}
+            <div style={{background:"#fff",borderRadius:12,padding:14,marginBottom:10,boxShadow:"0 2px 10px rgba(30,58,95,.06)"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                <div style={{fontSize:11,fontWeight:700,color:"#7c3aed"}}>🏢 사업주 부담 보험료</div>
+                <div style={{fontSize:9.5,color:"#9ca3af"}}>국민연금법§88 · 건강보험법§76 · 고용보험법§49</div>
+              </div>
+              <div style={{border:"1px solid #f1f5f9",borderRadius:8,overflow:"hidden",marginBottom:8}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",background:"#f8fafc",fontSize:10,fontWeight:700,color:"#64748b"}}>
+                  {["항목","요율","근로자","사업주"].map(h=><div key={h} style={{padding:"6px 10px",borderRight:"1px solid #f1f5f9"}}>{h}</div>)}
+                </div>
+                {[
+                  {label:"국민연금",rate:"각 4.75%",w:result.nps_w,e:result.nps_e,note:""},
+                  {label:"건강보험",rate:"각 3.595%",w:result.hi_w,e:result.hi_e,note:""},
+                  {label:"장기요양",rate:"각 0.4724%",w:result.ltc_w,e:result.ltc_e,note:""},
+                  {label:"고용보험",rate:"0.9% / 1.15%",w:result.ei_w,e:result.ei_e,note:"150인미만"},
+                  {label:"산재보험",rate:"1.0% (가정)",w:null,e:result.wc_e,note:"⚠️업종별상이",warn:true},
+                ].map((it,i)=>(
+                  <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",borderTop:"1px solid #f1f5f9",fontSize:11.5,background:it.warn?"#fff7ed":"transparent"}}>
+                    <div style={{padding:"5px 10px",color:it.warn?"#92400e":"#374151",fontWeight:500,borderRight:"1px solid #f1f5f9"}}>
+                      {it.label}{it.note&&<span style={{fontSize:9,color:"#9ca3af",display:"block"}}>{it.note}</span>}
+                    </div>
+                    <div style={{padding:"5px 10px",color:"#64748b",fontSize:10.5,borderRight:"1px solid #f1f5f9"}}>{it.rate}</div>
+                    <div style={{padding:"5px 10px",fontFamily:"monospace",fontWeight:600,color:"#374151",borderRight:"1px solid #f1f5f9",whiteSpace:"nowrap"}}>{it.w!=null?`${fmt(it.w)}원`:"-"}</div>
+                    <div style={{padding:"5px 10px",fontFamily:"monospace",fontWeight:600,color:it.warn?"#92400e":"#7c3aed",whiteSpace:"nowrap"}}>{fmt(it.e)}원</div>
+                  </div>
+                ))}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",borderTop:"2px solid #e2e8f0",background:"#f5f3ff",fontSize:12,fontWeight:700}}>
+                  <div style={{padding:"7px 10px",color:"#4c1d95",borderRight:"1px solid #ede9fe"}}>합계</div>
+                  <div style={{padding:"7px 10px",color:"#64748b",fontSize:10,borderRight:"1px solid #ede9fe"}}>-</div>
+                  <div style={{padding:"7px 10px",fontFamily:"monospace",color:"#374151",borderRight:"1px solid #ede9fe"}}>{fmt(result.totW4)}원</div>
+                  <div style={{padding:"7px 10px",fontFamily:"monospace",color:"#7c3aed"}}>{fmt(result.totEmp)}원</div>
+                </div>
+              </div>
+              <div style={{background:"linear-gradient(135deg,#4c1d95,#7c3aed)",borderRadius:8,padding:"11px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div>
+                  <div style={{fontSize:11,color:"rgba(255,255,255,.85)",fontWeight:600}}>총 인건비 (사업주 실부담)</div>
+                  <div style={{fontSize:9,color:"rgba(255,255,255,.6)",marginTop:1}}>세전급여 {fmt(result.gross)}원 + 사업주보험 {fmt(result.totEmp)}원</div>
+                </div>
+                <div style={{fontSize:18,fontWeight:700,color:"#fff",fontFamily:"monospace"}}>{fmt(result.totalLabor)}원</div>
+              </div>
+              <div style={{fontSize:9,color:"#f59e0b",marginTop:6,lineHeight:1.6}}>
+                ⚠️ 산재보험: 업종별 요율 상이 (고용노동부 고시) — 1.0% 가정 | 고용보험 사업주(1.15%) = 150인 미만 기준
+              </div>
+            </div>
 
             {/* 시급 */}
             <div style={{background:"#fff",borderRadius:12,padding:14,marginBottom:10,boxShadow:"0 2px 10px rgba(30,58,95,.06)"}}>
