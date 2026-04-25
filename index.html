@@ -10,8 +10,7 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- 카카오 우편번호 서비스 (Daum Postcode API) -->
-  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+  <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Noto Sans KR', sans-serif; }
@@ -1102,12 +1101,17 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
 
   // 카카오 우편번호 서비스 (Daum Postcode API) - 무료, 회원가입 불필요
   function searchAddr(callback){
+    if(!window.daum || !window.daum.Postcode){
+      alert("주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
     new window.daum.Postcode({
       oncomplete:function(data){
-        // 도로명 주소 우선, 없으면 지번
         const addr = data.roadAddress || data.jibunAddress;
         callback(addr);
-      }
+      },
+      width:"100%",
+      height:"100%"
     }).open();
   }
 
