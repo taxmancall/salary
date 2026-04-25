@@ -10,7 +10,7 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.umd.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Noto Sans KR', sans-serif; }
@@ -1112,11 +1112,12 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
   async function dlContractDocx(r){
     const now=new Date();
     const dateStr=`${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일`;
+    // docx 7.x CDN: window.docx 전역 객체
     const {
       Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,
       AlignmentType,BorderStyle,WidthType,ShadingType,VerticalAlign,
       HeadingLevel
-    } = window.docx;
+    } = window.docx || docx;
 
     const border={style:BorderStyle.SINGLE,size:4,color:"AAAAAA"};
     const borders={top:border,bottom:border,left:border,right:border};
