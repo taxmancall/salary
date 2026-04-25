@@ -714,29 +714,55 @@ function childCredit(n) {
 
 // 간이세액표 룩업: 월 과세급여(원) + 부양가족수 → 소득세(원)
 // 급여를 천원 단위로 변환 후 이상~미만 구간 탐색
+// ※ 9,980천원 초과분: 소득세법시행령 별표2 비고 계산식 적용 (2026.2.27 개정)
+//
+// 10,000천원 기준 세액 (가족수 1~11명)
+const TAX_BASE_10000 = [1507400,1431570,1200840,1170840,1140840,1110840,1080840,1050840,1020840,990840,960840];
+
+function calcOverflowTax(W, dep) {
+  // W: 월 과세급여(원), dep: 공제대상가족수(1~11)
+  const base = TAX_BASE_10000[dep - 1];
+  const Wk = W / 1000; // 천원 단위
+  if (Wk <= 14000) return base + (W - 10000000) * 0.98 * 0.35 + 25000;
+  if (Wk <= 28000) return base + 1397000    + (W - 14000000) * 0.98 * 0.38;
+  if (Wk <= 30000) return base + 6610600    + (W - 28000000) * 0.98 * 0.40;
+  if (Wk <= 45000) return base + 7394600    + (W - 30000000) * 0.40;
+  if (Wk <= 87000) return base + 13394600   + (W - 45000000) * 0.42;
+  return              base + 31034600   + (W - 87000000) * 0.45;
+}
+
 function lookupTax(taxableMonthly, dependents, childrenAge8to20) {
   const dep = Math.max(1, Math.min(11, dependents));
   const w_k = Math.floor(taxableMonthly / 1000); // 천원 단위 절사
+
+  // 9,980천원 초과: 비고 계산식 적용 (소득세법시행령 별표2 비고, 2026.2.27 개정)
+  // 10,000천원 기준값은 TAX_BASE_10000 별도 적용
+  // 10,000천원 초과(즉 w_k > 10000)부터 비고 계산식 적용
+  if (w_k === 10000) {
+    return Math.max(0, TAX_BASE_10000[dep-1] - childCredit(childrenAge8to20));
+  }
+  if (w_k > 10000) {
+    const tax = calcOverflowTax(taxableMonthly, dep);
+    return Math.max(0, Math.round(tax) - childCredit(childrenAge8to20));
+  }
 
   // 이분탐색으로 해당 구간 찾기
   let lo = 0, hi = TAX_TABLE.length - 1, idx = -1;
   while (lo <= hi) {
     const mid = (lo + hi) >> 1;
     const low = TAX_TABLE[mid][0];
-    // 다음 구간의 이상값
     const nextLow = mid + 1 < TAX_TABLE.length ? TAX_TABLE[mid + 1][0] : Infinity;
     if (w_k >= low && w_k < nextLow) { idx = mid; break; }
     if (w_k < low) hi = mid - 1;
     else lo = mid + 1;
   }
 
-  // 표 범위 초과: 최고 구간 또는 0
   if (idx === -1) {
     if (w_k < TAX_TABLE[0][0]) return 0;
     idx = TAX_TABLE.length - 1;
   }
 
-  const baseTax = TAX_TABLE[idx][dep]; // 가족수별 세액 (인덱스 1~11)
+  const baseTax = TAX_TABLE[idx][dep];
   return Math.max(0, baseTax - childCredit(childrenAge8to20));
 }
 
