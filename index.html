@@ -6,7 +6,7 @@
   <title>급여 계산기 | 원제우세무사사무소</title>
   <meta name="description" content="2026년 4대보험·간이세액표 기반 급여 계산기 — 원제우세무사사무소"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet"/>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -830,7 +830,7 @@ function Row({label,amount,isTotal,isSub,isHeader,accent,dimZero}) {
 
 function SalaryCalc() {
   const [form,setForm]=useState({
-    companyName:"",ceoName:"",companyAddr:"",
+    companyName:"",ceoName:"",companyAddr:"",companyRegNo:"",companyPhone:"",
     name:"",workerAddr:"",workerPhone:"",workerEmail:"",
     baseSalary:"",mealAllowance:"",carAllowance:"",
     childAllowance:"",otherNontax:"",weeklyHours:"40",
@@ -909,7 +909,7 @@ function SalaryCalc() {
       minWageBase,minWageH,
       pos:form.position,dept:form.dept,startDate:form.startDate,
       companyName:form.companyName||"회사명 미입력",ceoName:form.ceoName||"대표자 미입력",
-      companyAddr:form.companyAddr||"",
+      companyAddr:form.companyAddr||"",companyRegNo:form.companyRegNo||"",companyPhone:form.companyPhone||"",
       workerAddr:form.workerAddr||"",workerPhone:form.workerPhone||"",workerEmail:form.workerEmail||"",
     });
     setTab("result");
@@ -1059,11 +1059,15 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
   <div class="sub">근로기준법 제17조에 따라 다음과 같이 근로계약을 체결한다.</div>
   <div class="sec"><div class="st">1. 당사자</div>
   <table>
+    <tr><td style="background:#f0f4f8;font-weight:700;color:#1e3a5f" colspan="2">사 용 자</td></tr>
     <tr><td>사업장명</td><td>${r.companyName}</td></tr>
     <tr><td>사업장 주소</td><td>${r.companyAddr||"　"}</td></tr>
-    <tr><td>사용자(대표자)</td><td>${r.ceoName}</td></tr>
-    <tr><td>근로자 성명</td><td>${r.name}</td></tr>
-    <tr><td>근로자 주소</td><td>${r.workerAddr||"　"}</td></tr>
+    <tr><td>사업자번호</td><td>${r.companyRegNo||"　"}</td></tr>
+    <tr><td>대표자</td><td>${r.ceoName}</td></tr>
+    <tr><td>연락처</td><td>${r.companyPhone||"　"}</td></tr>
+    <tr><td style="background:#f0f4f8;font-weight:700;color:#1e3a5f" colspan="2">근 로 자</td></tr>
+    <tr><td>성명</td><td>${r.name}</td></tr>
+    <tr><td>주소</td><td>${r.workerAddr||"　"}</td></tr>
     <tr><td>연락처</td><td>${r.workerPhone||"　"}</td></tr>
     <tr><td>이메일</td><td>${r.workerEmail||"　"}</td></tr>
     <tr><td>부서 / 직위</td><td>${r.dept||"-"} / ${r.pos}</td></tr>
@@ -1286,9 +1290,9 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
 
       <div style={{background:"linear-gradient(135deg,#1e3a5f,#2563eb)",padding:"20px 24px",color:"#fff"}}>
         <div style={{maxWidth:640,margin:"0 auto"}}>
-          <div style={{fontSize:10,opacity:.7,letterSpacing:".1em",textTransform:"uppercase",marginBottom:4}}>원제우세무사사무소 급여 계산기</div>
-          <h1 style={{fontSize:18,fontWeight:700}}>급여 계산기</h1>
-          <div style={{fontSize:10,opacity:.75,marginTop:2}}>
+          <div style={{fontSize:20,fontWeight:800,letterSpacing:".05em",marginBottom:6}}>원제우세무사사무소</div>
+          <h1 style={{fontSize:15,fontWeight:600,opacity:.85}}>급여 계산기</h1>
+          <div style={{fontSize:10,opacity:.7,marginTop:4}}>
             간이세액표 [별표2] 엑셀 직접 파싱 · 2026.2.27 개정 · 4대보험 공단 모의계산 기준
           </div>
         </div>
@@ -1312,6 +1316,10 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
                 <Field label="대표자명" value={form.ceoName} onChange={setF("ceoName")} placeholder="홍길동" suffix=""/>
               </div>
               <Field label="회사 주소" value={form.companyAddr} onChange={setF("companyAddr")} placeholder="서울시 강남구 ○○로 123" suffix=""/>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 10px"}}>
+                <Field label="사업자번호" value={form.companyRegNo} onChange={setF("companyRegNo")} placeholder="000-00-00000" suffix=""/>
+                <Field label="회사 연락처" value={form.companyPhone} onChange={setF("companyPhone")} placeholder="02-0000-0000" suffix=""/>
+              </div>
               <div style={{fontSize:9.5,color:"#94a3b8",marginTop:-6,marginBottom:4}}>※ 급여명세서·근로계약서에 자동 반영됩니다</div>
             </div>
 
