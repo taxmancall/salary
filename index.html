@@ -830,8 +830,9 @@ function Row({label,amount,isTotal,isSub,isHeader,accent,dimZero}) {
 
 function SalaryCalc() {
   const [form,setForm]=useState({
-    companyName:"",ceoName:"",
-    name:"",baseSalary:"",mealAllowance:"",carAllowance:"",
+    companyName:"",ceoName:"",companyAddr:"",
+    name:"",workerAddr:"",workerPhone:"",workerEmail:"",
+    baseSalary:"",mealAllowance:"",carAllowance:"",
     childAllowance:"",otherNontax:"",weeklyHours:"40",
     dependents:"1",childrenAge8to20:"0",
     position:"사원",dept:"",startDate:"",
@@ -908,6 +909,8 @@ function SalaryCalc() {
       minWageBase,minWageH,
       pos:form.position,dept:form.dept,startDate:form.startDate,
       companyName:form.companyName||"회사명 미입력",ceoName:form.ceoName||"대표자 미입력",
+      companyAddr:form.companyAddr||"",
+      workerAddr:form.workerAddr||"",workerPhone:form.workerPhone||"",workerEmail:form.workerEmail||"",
     });
     setTab("result");
   },[form]);
@@ -1057,14 +1060,18 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
   <div class="sec"><div class="st">1. 당사자</div>
   <table>
     <tr><td>사업장명</td><td>${r.companyName}</td></tr>
+    <tr><td>사업장 주소</td><td>${r.companyAddr||"　"}</td></tr>
     <tr><td>사용자(대표자)</td><td>${r.ceoName}</td></tr>
     <tr><td>근로자 성명</td><td>${r.name}</td></tr>
+    <tr><td>근로자 주소</td><td>${r.workerAddr||"　"}</td></tr>
+    <tr><td>연락처</td><td>${r.workerPhone||"　"}</td></tr>
+    <tr><td>이메일</td><td>${r.workerEmail||"　"}</td></tr>
     <tr><td>부서 / 직위</td><td>${r.dept||"-"} / ${r.pos}</td></tr>
     <tr><td>입사일(계약개시일)</td><td>${r.startDate||"____년 ____월 ____일"}</td></tr>
   </table></div>
   <div class="sec"><div class="st">2. 근로조건</div>
   <table>
-    <tr><td>근무장소</td><td>${r.companyName} 및 대표자 지정 장소</td></tr>
+    <tr><td>근무장소</td><td>${r.companyName}${r.companyAddr?" ("+r.companyAddr+")":""} 및 대표자 지정 장소</td></tr>
     <tr><td>담당업무</td><td>${r.dept?r.dept+" 관련 업무":"세무 관련 업무 일체"}</td></tr>
     <tr><td>소정근로시간</td><td>1일 ${Math.round(r.wh/5*10)/10}시간, 주 ${r.wh}시간</td></tr>
     <tr><td>월 소정근로시간</td><td>${r.mh}시간 (주휴시간 포함)</td></tr>
@@ -1304,6 +1311,7 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
                 <Field label="회사명 (사업장명)" value={form.companyName} onChange={setF("companyName")} placeholder="○○주식회사" suffix=""/>
                 <Field label="대표자명" value={form.ceoName} onChange={setF("ceoName")} placeholder="홍길동" suffix=""/>
               </div>
+              <Field label="회사 주소" value={form.companyAddr} onChange={setF("companyAddr")} placeholder="서울시 강남구 ○○로 123" suffix=""/>
               <div style={{fontSize:9.5,color:"#94a3b8",marginTop:-6,marginBottom:4}}>※ 급여명세서·근로계약서에 자동 반영됩니다</div>
             </div>
 
@@ -1314,6 +1322,11 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
                 <Field label="직위" value={form.position} onChange={setF("position")} placeholder="사원" suffix=""/>
                 <Field label="부서" value={form.dept} onChange={setF("dept")} placeholder="세무팀" suffix=""/>
                 <Field label="입사일" value={form.startDate} onChange={setF("startDate")} suffix="" type="date"/>
+              </div>
+              <Field label="근로자 주소" value={form.workerAddr} onChange={setF("workerAddr")} placeholder="서울시 ○○구 ○○로 456" suffix=""/>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 10px"}}>
+                <Field label="연락처" value={form.workerPhone} onChange={setF("workerPhone")} placeholder="010-0000-0000" suffix=""/>
+                <Field label="이메일" value={form.workerEmail} onChange={setF("workerEmail")} placeholder="example@email.com" suffix=""/>
               </div>
             </div>
 
