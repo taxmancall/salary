@@ -830,6 +830,7 @@ function Row({label,amount,isTotal,isSub,isHeader,accent,dimZero}) {
 
 function SalaryCalc() {
   const [form,setForm]=useState({
+    companyName:"",ceoName:"",
     name:"",baseSalary:"",mealAllowance:"",carAllowance:"",
     childAllowance:"",otherNontax:"",weeklyHours:"40",
     dependents:"1",childrenAge8to20:"0",
@@ -906,6 +907,7 @@ function SalaryCalc() {
       minH:C.MIN_HOURLY,minMon:C.MIN_HOURLY*mh,
       minWageBase,minWageH,
       pos:form.position,dept:form.dept,startDate:form.startDate,
+      companyName:form.companyName||"회사명 미입력",ceoName:form.ceoName||"대표자 미입력",
     });
     setTab("result");
   },[form]);
@@ -960,7 +962,7 @@ body{font-family:'Noto Sans KR',sans-serif;font-size:12.5px;background:#eef2ff;d
 @media print{body{background:#fff;padding:0}.w{box-shadow:none;border-radius:0}}
 </style></head><body>
 <div class="w">
-  <div class="hd"><div class="badge">원제우세무사사무소</div><h1>급 여 명 세 서</h1><p>${period} 귀속</p></div>
+  <div class="hd"><div class="badge">${r.companyName}</div><h1>급 여 명 세 서</h1><p>${period} 귀속</p></div>
   <div class="emp">
     <div class="ec"><div class="el">성명</div><div class="ev">${r.name}</div></div>
     <div class="ec"><div class="el">부서/직위</div><div class="ev">${r.dept||"-"} / ${r.pos}</div></div>
@@ -1054,15 +1056,15 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
   <div class="sub">근로기준법 제17조에 따라 다음과 같이 근로계약을 체결한다.</div>
   <div class="sec"><div class="st">1. 당사자</div>
   <table>
-    <tr><td>사업장명</td><td>원제우세무사사무소</td></tr>
-    <tr><td>사용자(대표자)</td><td>원제우 세무사</td></tr>
+    <tr><td>사업장명</td><td>${r.companyName}</td></tr>
+    <tr><td>사용자(대표자)</td><td>${r.ceoName}</td></tr>
     <tr><td>근로자 성명</td><td>${r.name}</td></tr>
     <tr><td>부서 / 직위</td><td>${r.dept||"-"} / ${r.pos}</td></tr>
     <tr><td>입사일(계약개시일)</td><td>${r.startDate||"____년 ____월 ____일"}</td></tr>
   </table></div>
   <div class="sec"><div class="st">2. 근로조건</div>
   <table>
-    <tr><td>근무장소</td><td>원제우세무사사무소 및 대표자 지정 장소</td></tr>
+    <tr><td>근무장소</td><td>${r.companyName} 및 대표자 지정 장소</td></tr>
     <tr><td>담당업무</td><td>${r.dept?r.dept+" 관련 업무":"세무 관련 업무 일체"}</td></tr>
     <tr><td>소정근로시간</td><td>1일 ${Math.round(r.wh/5*10)/10}시간, 주 ${r.wh}시간</td></tr>
     <tr><td>월 소정근로시간</td><td>${r.mh}시간 (주휴시간 포함)</td></tr>
@@ -1091,11 +1093,11 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
     <p>⑤ 연장·야간·휴일근로에 대하여는 근로기준법 소정의 가산임금을 지급하며, 기준 통상시급은 ${fmt(r.oH)}원으로 한다.</p>
   </div></div>
   <div style="text-align:center;font-size:11.5px;color:#374151;margin-top:12px">
-    위와 같이 근로계약을 체결하고, 계약서 2부를 작성하여 각 1부씩 보관한다.<br><br>
+    위와 같이 ${r.companyName}과 ${r.name}은(는) 근로계약을 체결하고, 계약서 2부를 작성하여 각 1부씩 보관한다.<br><br>
     <strong>${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일</strong>
   </div>
   <div class="sign">
-    <div class="sb"><div class="sl">사용자</div><div class="sn">원제우세무사사무소<br>대표 원제우 세무사</div><div class="ss">서명 ________________________ (인)</div></div>
+    <div class="sb"><div class="sl">사용자</div><div class="sn">${r.companyName}<br>대표 ${r.ceoName}</div><div class="ss">서명 ________________________ (인)</div></div>
     <div class="sb"><div class="sl">근로자</div><div class="sn">${r.name}</div><div class="ss">서명 ________________________ (인)</div></div>
   </div>
 </div></body></html>`;
@@ -1152,14 +1154,14 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
     });
 
     const rows1=[
-      cell("사업장명","원제우세무사사무소"),
-      cell("사용자(대표자)","원제우 세무사"),
+      cell("사업장명",r.companyName),
+      cell("사용자(대표자)",r.ceoName),
       cell("근로자 성명",r.name||""),
       cell("부서 / 직위",`${r.dept||"-"} / ${r.pos}`),
       cell("입사일(계약개시일)",r.startDate||"____년 ____월 ____일"),
     ];
     const rows2=[
-      cell("근무장소","원제우세무사사무소 및 대표자 지정 장소"),
+      cell("근무장소",`${r.companyName} 및 대표자 지정 장소`),
       cell("담당업무",r.dept?`${r.dept} 관련 업무`:"세무 관련 업무 일체"),
       cell("소정근로시간",`1일 ${Math.round(r.wh/5*10)/10}시간, 주 ${r.wh}시간`),
       cell("월 소정근로시간",`${r.mh}시간 (주휴시간 포함)`),
@@ -1233,8 +1235,8 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
                 margins:{top:80,bottom:80,left:120,right:120},
                 children:[
                   new Paragraph({children:[new TextRun({text:"사 용 자",bold:true,size:21,font:"맑은 고딕"})]}),
-                  new Paragraph({spacing:{before:120},children:[new TextRun({text:"원제우세무사사무소",size:21,font:"맑은 고딕"})]}),
-                  new Paragraph({children:[new TextRun({text:"대표  원제우 세무사",size:21,font:"맑은 고딕"})]}),
+                  new Paragraph({spacing:{before:120},children:[new TextRun({text:r.companyName,size:21,font:"맑은 고딕"})]}),
+                  new Paragraph({children:[new TextRun({text:`대표  ${r.ceoName}`,size:21,font:"맑은 고딕"})]}),
                   new Paragraph({spacing:{before:200},border:{top:{style:BorderStyle.SINGLE,size:4,color:"374151",space:1}},
                     children:[new TextRun({text:"서명 ________________________ (인)",size:20,color:"888888",font:"맑은 고딕"})]})
                 ]
@@ -1277,7 +1279,7 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
 
       <div style={{background:"linear-gradient(135deg,#1e3a5f,#2563eb)",padding:"20px 24px",color:"#fff"}}>
         <div style={{maxWidth:640,margin:"0 auto"}}>
-          <div style={{fontSize:10,opacity:.7,letterSpacing:".1em",textTransform:"uppercase",marginBottom:4}}>원제우세무사사무소</div>
+          <div style={{fontSize:10,opacity:.7,letterSpacing:".1em",textTransform:"uppercase",marginBottom:4}}>원제우세무사사무소 급여 계산기</div>
           <h1 style={{fontSize:18,fontWeight:700}}>급여 계산기</h1>
           <div style={{fontSize:10,opacity:.75,marginTop:2}}>
             간이세액표 [별표2] 엑셀 직접 파싱 · 2026.2.27 개정 · 4대보험 공단 모의계산 기준
@@ -1296,6 +1298,15 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
 
         {tab==="input"&&(
           <div>
+            <div style={{background:"#fff",borderRadius:12,padding:18,marginBottom:10,boxShadow:"0 2px 10px rgba(30,58,95,.06)"}}>
+              <div style={{fontSize:11.5,fontWeight:700,color:"#1e3a5f",marginBottom:12}}>🏢 회사 정보</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 10px"}}>
+                <Field label="회사명 (사업장명)" value={form.companyName} onChange={setF("companyName")} placeholder="○○주식회사" suffix=""/>
+                <Field label="대표자명" value={form.ceoName} onChange={setF("ceoName")} placeholder="홍길동" suffix=""/>
+              </div>
+              <div style={{fontSize:9.5,color:"#94a3b8",marginTop:-6,marginBottom:4}}>※ 급여명세서·근로계약서에 자동 반영됩니다</div>
+            </div>
+
             <div style={{background:"#fff",borderRadius:12,padding:18,marginBottom:10,boxShadow:"0 2px 10px rgba(30,58,95,.06)"}}>
               <div style={{fontSize:11.5,fontWeight:700,color:"#1e3a5f",marginBottom:12}}>👤 직원 정보</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 10px"}}>
