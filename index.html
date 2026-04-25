@@ -1112,12 +1112,14 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
   async function dlContractDocx(r){
     const now=new Date();
     const dateStr=`${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일`;
-    // docx 7.x CDN: window.docx 전역 객체
+    // docx 7.x CDN UMD → window.docx 전역 객체
+    const docxLib = window.docx;
+    if(!docxLib){alert("docx 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.");return;}
     const {
       Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,
       AlignmentType,BorderStyle,WidthType,ShadingType,VerticalAlign,
       HeadingLevel
-    } = window.docx || docx;
+    } = docxLib;
 
     const border={style:BorderStyle.SINGLE,size:4,color:"AAAAAA"};
     const borders={top:border,bottom:border,left:border,right:border};
@@ -1255,13 +1257,15 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
       }]
     });
 
-    const buf=await Packer.toBuffer(doc);
-    const blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url;
-    a.download=`근로계약서_${r.name||"미입력"}.docx`;
+    // Packer.toBlob → 브라우저 전용 (toBuffer는 Node.js 환경)
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `근로계약서_${r.name||"미입력"}.docx`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
 
