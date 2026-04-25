@@ -859,8 +859,10 @@ function SalaryCalc() {
     const mh = wh === 40 ? 209 : Math.floor((wh + wHol) * 365 / 7 / 12);
 
     // ── 통상시급 (근로기준법 §2①8, 연장·야간·휴일 가산 기준) ──
-    // 기본급 ÷ 월 소정근로시간 (비과세수당 제외)
-    const oH = Math.floor(base / mh);
+    // 식대: 모든 근로자에게 정기적·일률적으로 지급 → 통상임금 산입 (대법원 2013다4895)
+    // 통상시급 = (기본급 + 식대) ÷ 월 소정근로시간
+    const ordinaryBase = base + meal;
+    const oH = Math.floor(ordinaryBase / mh);
 
     // ── 최저임금 판단용 시간급 (최저임금법 §6④, 시행령 §5의2) ──
     // 산입 범위: 기본급 + 복리후생비(식대·차량유지비·자녀양육비) 중 월 최저임금액 × 1% 초과분
@@ -878,7 +880,7 @@ function SalaryCalc() {
       nps_w,nps_e,hi_w,hi_e,ltc_w,ltc_e,ei_w,ei_e,wc_e,
       totW4,incTax,locTax,totDed,net,
       totEmp,totalLabor,
-      wh,mh,oH,dep,c820,
+      wh,mh,oH,ordinaryBase,dep,c820,
       minH:C.MIN_HOURLY,minMon:C.MIN_HOURLY*mh,
       minWageBase,minWageH,welfareIncluded,welfareExclude,welfarePay,
       pos:form.position,dept:form.dept,startDate:form.startDate,
@@ -970,7 +972,7 @@ body{font-family:'Noto Sans KR',sans-serif;font-size:12.5px;background:#eef2ff;d
     <div class="si"><div class="sil">실 지급액</div><div class="siv ac">${fmt(r.net)}</div></div>
   </div>
   <div class="hr">
-    <div class="hi2"><div class="hl">📌 통상시급 (연장·야간·휴일 기준 / 근기법§2①8)</div><div class="hv">${fmt(r.oH)}원/h</div><div class="hs">기본급 ${fmt(r.base)}원 ÷ ${r.mh}h</div></div>
+    <div class="hi2"><div class="hl">📌 통상시급 (연장·야간·휴일 기준 / 근기법§2①8)</div><div class="hv">${fmt(r.oH)}원/h</div><div class="hs">(기본급+식대) ${fmt(r.ordinaryBase)}원 ÷ ${r.mh}h</div></div>
     <div class="hi2"><div class="hl">⚖️ 최저임금 판단 시간급 ${r.minWageH>=r.minH?"✅ 충족":"❌ 미달"} (최저임금법§6④)</div><div class="hv" style="color:${r.minWageH>=r.minH?"#065f46":"#dc2626"}">${fmt(r.minWageH)}원/h</div><div class="hs">산입임금 ${fmt(r.minWageBase)}원 ÷ ${r.mh}h · 최저 ${fmt(r.minH)}원</div></div>
   </div>
   <div class="emp-sec">
@@ -1054,7 +1056,7 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
     ${r.ch?`<tr><td>자녀양육비</td><td>월 ${fmt(r.ch)}원 (비과세 한도 ${fmt(r.chNt)}원)</td></tr>`:""}
     ${r.oNt?`<tr><td>기타비과세</td><td>월 ${fmt(r.oNt)}원</td></tr>`:""}
     <tr><td>세전 합계</td><td>월 ${fmt(r.gross)}원</td></tr>
-    <tr><td>통상시급</td><td>${fmt(r.oH)}원/시간 (기본급 ${fmt(r.base)}원 ÷ 월소정 ${r.mh}시간)</td></tr>
+    <tr><td>통상시급</td><td>${fmt(r.oH)}원/시간 (기본급+식대 ${fmt(r.ordinaryBase)}원 ÷ 월소정 ${r.mh}시간 / 근로기준법§2①8)</td></tr>
     <tr><td>임금지급일</td><td>매월 ____일 (계좌 이체)</td></tr>
     <tr><td>법정공제</td><td>국민연금·건강보험·장기요양·고용보험·소득세·지방소득세 (관계 법령에 따라 공제)</td></tr>
   </table></div>
@@ -1062,7 +1064,7 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
   <div class="cl">
     <p>① 이 계약서에 명시되지 않은 사항은 근로기준법, 최저임금법 및 관련 법령에 따른다.</p>
     <p>② 사용자는 근로자에게 이 계약서 사본 1부를 교부하며, 근로자는 이를 수령한다. (근로기준법 §17②)</p>
-    <p>③ 2026년도 최저시급은 10,320원이며, 근로자의 통상시급 ${fmt(r.oH)}원은 이를 상회함을 확인한다.</p>
+    <p>③ 2026년도 최저시급은 10,320원이며, 식대는 통상임금에 산입(대법원 2013다4895)되어 통상시급 ${fmt(r.oH)}원은 최저시급을 상회함을 확인한다.</p>
     <p>④ 본 계약의 유효기간은 ${r.startDate||"입사일"}부터이며, 기간의 정함이 없는 근로계약으로 한다.</p>
     <p>⑤ 연장·야간·휴일근로에 대하여는 근로기준법 소정의 가산임금을 지급하며, 기준 통상시급은 ${fmt(r.oH)}원으로 한다.</p>
   </div></div>
@@ -1246,8 +1248,8 @@ td:first-child{background:#f8fafc;font-weight:600;width:30%;color:#374151}
                   <div style={{fontSize:9.5,color:"#3b82f6",fontWeight:700,marginBottom:2}}>통상시급 (연장·야간·휴일 기준)</div>
                   <div style={{fontSize:22,fontWeight:700,color:"#1e3a5f",fontFamily:"monospace"}}>{fmt(result.oH)}원</div>
                   <div style={{fontSize:9.5,color:"#64748b",marginTop:4,lineHeight:1.7}}>
-                    기본급 {fmt(result.base)}원 ÷ {result.mh}h<br/>
-                    <span style={{color:"#94a3b8"}}>근로기준법 §2①8</span>
+                    (기본급+식대) {fmt(result.ordinaryBase)}원 ÷ {result.mh}h<br/>
+                    <span style={{color:"#94a3b8"}}>근로기준법 §2①8 · 대법원 2013다4895</span>
                   </div>
                 </div>
                 {/* 최저임금 판단 시간급 */}
